@@ -4,16 +4,12 @@ package main
 import (
 	"fmt"
 	"golore/historygen"
-	"golore/namegen"
-	"strings"
 )
 
 func main() {
-	ngen := namegen.RogueLike{}
+	h := &historygen.History{}
 
-	gods := historygen.CreateGods(ngen, 7)
-
-	for _, g := range gods {
-		fmt.Println(g.Name + " " + g.Gender + " of " + strings.Join(g.Elements, " and "))
-	}
+	fmt.Println(h.CreateWorld().Text)
+	fmt.Println(h.CreateWater().Text)
+	fmt.Println(h.CreateHeavens().Text)
 }

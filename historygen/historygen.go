@@ -2,56 +2,56 @@
 package historygen
 
 import (
+	"fmt"
 	"golore/namegen"
-	"math"
-	"math/rand"
-	"time"
 )
 
-type Diety struct {
-	Name     string
-	Gender   string
-	power    int
-	Elements []string
+type Event struct {
+	Text string
 }
 
-func CreateGods(ngen namegen.NameType, count int) []Diety {
-	ds := make([]Diety, count)
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	pwr := 100
-	elms := []string{"earth", "sky", "love", "fire", "death", "birth", "water", "fear", "war", "moon", "sun", "sport", "night", "dawn", "harvest", "seasons", "fate", "time"}
+type History struct {
+	Dieties   []Diety
+	Events    []Event
+	WorldName string
+}
 
-	for i := 0; i < count; i++ {
-		elm := randElm(&elms, r)
-		if int(math.Mod(float64(i), 2.0)) == 0 {
-			ds[i] = Diety{
-				ngen.Male().Generate(r),
-				"God",
-				pwr,
-				[]string{elm},
-			}
+func (h *History) CreateWorld() Event {
+	ngen := namegen.RogueLike{}
+
+	h.WorldName = ngen.Female().String()
+	h.Dieties = CreateGods(ngen, 7)
+
+	d := DietyByElement(h.Dieties, "earth")
+	e := Event{fmt.Sprintf("The %s %s created the world %s", d.Gender, d.Name, h.WorldName)}
+	h.Events = append(h.Events, e)
+
+	return e
+}
+
+func (h *History) CreateWater() Event {
+	d := DietyByElement(h.Dieties, "water")
+	e := Event{fmt.Sprintf("The %s %s filled the rivers and the seas of %s", d.Gender, d.Name, h.WorldName)}
+	h.Events = append(h.Events, e)
+	return e
+}
+
+func (h *History) CreateHeavens() Event {
+	s := DietyByElement(h.Dieties, "sun")
+	m := DietyByElement(h.Dieties, "moon")
+	t := ""
+
+	if s.Name != m.Name {
+		if s.Gender != m.Gender {
+			t = fmt.Sprintf("The %s %s and %s %s ignited the sun and moon to light %s", s.Gender, s.Name, m.Gender, m.Name, h.WorldName)
 		} else {
-			ds[i] = Diety{
-				ngen.Female().Generate(r),
-				"Goddess",
-				pwr,
-				[]string{elm},
-			}
+			t = fmt.Sprintf("The %s's %s and %s ignited the sun and moon to light %s", s.Gender, s.Name, m.Name, h.WorldName)
 		}
+	} else {
+		t = fmt.Sprintf("The %s %s ignited the sun and moon to light %s", s.Gender, s.Name, h.WorldName)
 	}
 
-	//Randomly assign remaining elements
-	for len(elms) > 0 {
-		d := &ds[r.Intn(len(ds))]
-		d.Elements = append(d.Elements, randElm(&elms, r))
-	}
-
-	return ds
-}
-
-func randElm(elms *[]string, r *rand.Rand) string {
-	i := r.Intn(len(*elms))
-	elm := (*elms)[i]
-	*elms = append((*elms)[:i], (*elms)[i+1:]...)
-	return elm
+	e := Event{t}
+	h.Events = append(h.Events, e)
+	return e
 }
